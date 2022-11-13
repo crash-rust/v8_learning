@@ -1,7 +1,11 @@
+mod extensions;
 mod state;
+mod utils;
 
+use extensions::Extenstions;
 use state::JsRuntimeState;
-use v8::{CreateParams, HandleScope, Isolate, OwnedIsolate, Script, TryCatch, V8};
+use utils::execute_script;
+use v8::{CreateParams, HandleScope, Isolate, OwnedIsolate, V8};
 
 type LocalValue<'s> = v8::Local<'s, v8::Value>;
 pub struct JsRuntime {
@@ -53,17 +57,13 @@ impl JsRuntime {
     pub fn init_isolate(mut isolate: OwnedIsolate) -> Self {
         let state = JsRuntimeState::new(&mut isolate);
         isolate.set_slot(state);
+
+        {
+            let context = JsRuntimeState::get_context(&mut isolate);
+            let scope = &mut HandleScope::with_context(&mut isolate, context);
+            Extenstions::install(scope);
+        }
+
         JsRuntime { isolate }
     }
-}
-
-fn execute_script<'s>(
-    scope: &mut HandleScope<'s>,
-    code: impl AsRef<str>,
-) -> Result<LocalValue<'s>, LocalValue<'s>> {
-    let scope = &mut TryCatch::new(scope);
-    let source = v8::String::new(scope, code.as_ref()).unwrap();
-    Script::compile(scope, source, None)
-        .and_then(|script| script.run(scope))
-        .map_or_else(|| Err(scope.stack_trace()).unwrap(), Ok)
 }

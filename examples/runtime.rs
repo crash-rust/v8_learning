@@ -8,9 +8,11 @@ fn main() {
     // js代码
     let code = r#"
         function hello() {
+            var a = print("Hello World");
+            print(a)
             return {
-              code: 200,
-              message: "Hello world!"
+                code: 200,
+                message: "Hello world!"
             }
         }
 
