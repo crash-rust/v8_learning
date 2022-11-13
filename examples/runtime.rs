@@ -10,10 +10,7 @@ fn main() {
         function hello() {
             var a = print("Hello World");
             print(a)
-            return {
-                code: 200,
-                message: "Hello world!"
-            }
+            return fetch("https://www.rust-lang.org/");
         }
 
         hello();
